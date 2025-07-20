@@ -1,14 +1,15 @@
-//import Adding from "./components/Adding";
 import ToDoList from "./components/ToDoList";
-//import { DndContext, closestCorners } from "@dnd-kit/core";
-import { useEffect, useState } from "react";
+import { DndContext, closestCenter } from "@dnd-kit/core";
+import { useDroppable } from "@dnd-kit/core";
+
+import { useState } from "react";
 
 export type Tasks = {
   id: number;
   text: string;
   status: string;
 };
-//import { useDraggable } from '@dnd-kit/core'
+
 import "./index.css";
 
 function App() {
@@ -27,9 +28,22 @@ function App() {
     setTasks([...tasks, newTask]);
     setTask("");
   };
-  useEffect(() => {
-    console.log(tasks);
-  }, [task]);
+
+  function handleDragEnd(event: any) {
+    const { active, over } = event;
+    if (active.id === over.id || !over) return;
+
+    setTasks((task) =>
+      task.map((task) =>
+        task.id === active.id ? { ...task, status: over.id } : task
+      )
+    );
+  }
+
+  const { setNodeRef: BinRef } = useDroppable({
+    id: "bin",
+  });
+
   return (
     <div className="text-3xl text-[Arial] ml-2 ">
       <span>TO DO LIST</span>
@@ -47,10 +61,11 @@ function App() {
           Add Task
         </button>
       </div>
-      <ToDoList tasks={tasks}/>
-
+      <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        <ToDoList tasks={tasks} />
+      </DndContext>
       <div className=" flex justify-end ">
-        <p className="fixed bottom-3 right-0 text-8xl cursor-default">🗑️</p>
+        <p ref={BinRef}className="fixed bottom-3 right-0 text-8xl cursor-default">🗑️</p>
       </div>
     </div>
   );

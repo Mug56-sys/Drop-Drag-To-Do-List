@@ -1,4 +1,7 @@
 import type { Tasks } from "../App.tsx";
+import { useDroppable } from "@dnd-kit/core";
+import Task from "./Task.tsx";
+
 type Bucket = {
   name: string;
   type: string;
@@ -11,20 +14,22 @@ export default function ToDo({
   bucket: Bucket;
   tasks: Tasks[];
 }) {
+  const {setNodeRef}=useDroppable({
+    id:bucket.type
+  })
+
+  const tasksType=tasks.filter((task)=>task.status===bucket.type)
+
   return (
     <div
-      className="border  w-90 px-10 overflow-scroll h-100
+    ref={setNodeRef}
+      className="border  w-90 px-10 overflow-scroll h-100 active:cursor-grabbing
 "
     >
       <p>{bucket.name}</p>
-      {tasks.map((task: Tasks,index:number) => {
-        if(bucket.type!==tasks[index].status)return;
-        return (
-          <div className="bg-gray-500 border m-1 p-2" key={task.id}>
-            {task.text}
-          </div>
-        );
-      })}
+      {tasksType.map((task: Tasks) => 
+        (<Task key={task.id} id={task.id} text={task.text} />)
+        )}
     </div>
   );
 }
