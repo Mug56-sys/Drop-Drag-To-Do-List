@@ -23,8 +23,7 @@ export default function ToDo({
   return (
     <div
     ref={setNodeRef}
-      className="border  w-90 px-10 overflow-scroll h-100 active:cursor-grabbing
-"
+      className="border w-90 px-10 overflow-scroll h-100 active:cursor-grabbing relative"
     >
       <p>{bucket.name}</p>
       {tasksType.map((task: Tasks) => 

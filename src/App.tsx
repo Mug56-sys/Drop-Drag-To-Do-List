@@ -1,6 +1,5 @@
 import ToDoList from "./components/ToDoList";
-import { DndContext, closestCenter } from "@dnd-kit/core";
-import { useDroppable } from "@dnd-kit/core";
+import { DndContext, closestCenter, useDroppable } from "@dnd-kit/core";
 
 import { useState } from "react";
 
@@ -33,16 +32,17 @@ function App() {
     const { active, over } = event;
     if (active.id === over.id || !over) return;
 
-    setTasks((task) =>
-      task.map((task) =>
-        task.id === active.id ? { ...task, status: over.id } : task
+    if(over.id==="bin"){
+      setTasks((tasks)=>tasks.filter((t)=>t.id!==active.id))
+    }
+
+    setTasks((tasks) =>
+      tasks.map((task) =>
+        task.id === active.id ? { ...task, status: over.id  } : task
       )
     );
   }
 
-  const { setNodeRef: BinRef } = useDroppable({
-    id: "bin",
-  });
 
   return (
     <div className="text-3xl text-[Arial] ml-2 ">
@@ -64,9 +64,9 @@ function App() {
       <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
         <ToDoList tasks={tasks} />
       </DndContext>
-      <div className=" flex justify-end ">
-        <p ref={BinRef}className="fixed bottom-3 right-0 text-8xl cursor-default">🗑️</p>
-      </div>
+      
+        
+      
     </div>
   );
 }
