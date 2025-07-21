@@ -1,7 +1,7 @@
 import ToDoList from "./components/ToDoList";
-import { DndContext, closestCenter, useDroppable } from "@dnd-kit/core";
-
+import { DndContext, closestCenter, DragOverlay } from "@dnd-kit/core";
 import { useState } from "react";
+import Task from "./components/Task"; 
 
 export type Tasks = {
   id: number;
@@ -14,11 +14,13 @@ import "./index.css";
 function App() {
   const [task, setTask] = useState<string>("");
   const [tasks, setTasks] = useState<Tasks[]>([]);
+  const [dragId, setDragId] = useState<number | null>(null);
 
   const handleClick = (e: React.ChangeEvent<HTMLInputElement>) => {
     setTask(e.target.value);
   };
   const AddTask = () => {
+    if (task === "") return;
     const newTask = {
       id: tasks.length,
       text: task,
@@ -28,21 +30,26 @@ function App() {
     setTask("");
   };
 
+  function handleDragStart(event: any) {
+    setDragId(event.active.id);
+  }
+
   function handleDragEnd(event: any) {
     const { active, over } = event;
+    setDragId(null)
     if (active.id === over.id || !over) return;
+    
 
-    if(over.id==="bin"){
-      setTasks((tasks)=>tasks.filter((t)=>t.id!==active.id))
+    if (over.id === "bin") {
+      setTasks((tasks) => tasks.filter((t) => t.id !== active.id));
     }
 
     setTasks((tasks) =>
       tasks.map((task) =>
-        task.id === active.id ? { ...task, status: over.id  } : task
+        task.id === active.id ? { ...task, status: over.id } : task
       )
     );
   }
-
 
   return (
     <div className="text-3xl text-[Arial] ml-2 ">
@@ -61,12 +68,19 @@ function App() {
           Add Task
         </button>
       </div>
-      <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+      <DndContext collisionDetection={closestCenter} 
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}>
         <ToDoList tasks={tasks} />
+         <DragOverlay>
+    {dragId !== null ? (
+      <Task
+        id={dragId}
+        text={tasks.find((task) => task.id === dragId)?.text || ""}
+      />
+    ) : null}
+  </DragOverlay>
       </DndContext>
-      
-        
-      
     </div>
   );
 }
